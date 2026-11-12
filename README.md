@@ -1,4 +1,4 @@
-# ToDo-List
+# ToDo-List APP
 
 A lightweight, browser-based task manager built with plain HTML, CSS, and JavaScript.
 
