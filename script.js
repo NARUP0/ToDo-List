@@ -52,6 +52,11 @@ function renderTodos() {
     )
     .join('');
 
+  const items = todoList.querySelectorAll('.todo-item');
+  items.forEach((item, index) => {
+    item.style.animationDelay = `${index * 50}ms`;
+  });
+
   updateSummary();
 }
 
@@ -82,6 +87,17 @@ function addTodo(text) {
   renderTodos();
   todoForm.reset();
   todoInput.focus();
+  todoInput.animate(
+    [
+      { transform: 'scale(0.98)', boxShadow: '0 0 0 rgba(53, 99, 233, 0)' },
+      { transform: 'scale(1)', boxShadow: '0 0 0 6px rgba(53, 99, 233, 0.08)' },
+      { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(53, 99, 233, 0)' }
+    ],
+    {
+      duration: 280,
+      easing: 'ease-out'
+    }
+  );
 }
 
 function toggleTodo(id) {
@@ -94,6 +110,18 @@ function toggleTodo(id) {
 }
 
 function deleteTodo(id) {
+  const item = todoList.querySelector(`[data-id="${id}"]`);
+
+  if (item) {
+    item.classList.add('removing');
+    setTimeout(() => {
+      todos = todos.filter((todo) => todo.id !== id);
+      saveTodos();
+      renderTodos();
+    }, 180);
+    return;
+  }
+
   todos = todos.filter((todo) => todo.id !== id);
   saveTodos();
   renderTodos();
