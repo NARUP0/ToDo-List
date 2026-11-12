@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToDo List</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="todo-panel">
+        <header class="header">
+          <p class="eyebrow">Plan ahead</p>
+          <h1>My Todo List</h1>
+        </header>
+
+        <form id="todo-form" class="todo-form" autocomplete="off">
+          <label class="sr-only" for="todo-input">Add a todo item</label>
+          <input
+            id="todo-input"
+            name="todo"
+            type="text"
+            maxlength="120"
+            placeholder="What needs to be done?"
+            aria-label="Add a todo"
+          />
+          <button type="submit">Add</button>
+        </form>
+
+        <div class="toolbar">
+          <div class="stats" aria-live="polite">
+            <span id="items-left">0 items left</span>
+          </div>
+
+          <div class="filters" aria-label="Todo filters">
+            <button class="filter-btn active" data-filter="all" type="button">All</button>
+            <button class="filter-btn" data-filter="active" type="button">Active</button>
+            <button class="filter-btn" data-filter="completed" type="button">Completed</button>
+          </div>
+        </div>
+
+        <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+
+        <div class="footer-actions">
+          <button id="clear-completed" class="secondary" type="button">Clear completed</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

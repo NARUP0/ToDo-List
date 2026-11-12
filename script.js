@@ -1,0 +1,147 @@
+const storageKey = 'todo-list-items';
+const todoForm = document.getElementById('todo-form');
+const todoInput = document.getElementById('todo-input');
+const todoList = document.getElementById('todo-list');
+const itemsLeft = document.getElementById('items-left');
+const clearCompletedBtn = document.getElementById('clear-completed');
+const filterButtons = document.querySelectorAll('.filter-btn');
+
+let todos = JSON.parse(localStorage.getItem(storageKey)) || [];
+let activeFilter = 'all';
+
+function saveTodos() {
+  localStorage.setItem(storageKey, JSON.stringify(todos));
+}
+
+function getFilteredTodos() {
+  if (activeFilter === 'active') {
+    return todos.filter((todo) => !todo.completed);
+  }
+
+  if (activeFilter === 'completed') {
+    return todos.filter((todo) => todo.completed);
+  }
+
+  return [...todos];
+}
+
+function updateSummary() {
+  const remaining = todos.filter((todo) => !todo.completed).length;
+  const suffix = remaining === 1 ? 'item left' : 'items left';
+  itemsLeft.textContent = `${remaining} ${suffix}`;
+}
+
+function renderTodos() {
+  const filteredTodos = getFilteredTodos();
+
+  if (!filteredTodos.length) {
+    todoList.innerHTML = '<li class="empty-state">No todos here yet.</li>';
+    updateSummary();
+    return;
+  }
+
+  todoList.innerHTML = filteredTodos
+    .map(
+      (todo) => `
+        <li class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
+          <button class="toggle-btn" type="button" aria-label="Toggle completion for ${todo.text}" title="Toggle complete"></button>
+          <span class="todo-text">${escapeHtml(todo.text)}</span>
+          <button class="delete-btn" type="button" aria-label="Delete ${todo.text}">Delete</button>
+        </li>
+      `
+    )
+    .join('');
+
+  updateSummary();
+}
+
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function addTodo(text) {
+  const cleanedText = text.trim();
+
+  if (!cleanedText) {
+    todoInput.focus();
+    return;
+  }
+
+  todos.unshift({
+    id: crypto.randomUUID(),
+    text: cleanedText,
+    completed: false,
+  });
+
+  saveTodos();
+  renderTodos();
+  todoForm.reset();
+  todoInput.focus();
+}
+
+function toggleTodo(id) {
+  todos = todos.map((todo) =>
+    todo.id === id ? { ...todo, completed: !todo.completed } : todo
+  );
+
+  saveTodos();
+  renderTodos();
+}
+
+function deleteTodo(id) {
+  todos = todos.filter((todo) => todo.id !== id);
+  saveTodos();
+  renderTodos();
+}
+
+function clearCompleted() {
+  todos = todos.filter((todo) => !todo.completed);
+  saveTodos();
+  renderTodos();
+}
+
+todoForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  addTodo(todoInput.value);
+});
+
+todoList.addEventListener('click', (event) => {
+  const target = event.target;
+  const item = target.closest('.todo-item');
+
+  if (!item) {
+    return;
+  }
+
+  const { id } = item.dataset;
+
+  if (target.matches('.toggle-btn')) {
+    toggleTodo(id);
+    return;
+  }
+
+  if (target.matches('.delete-btn')) {
+    deleteTodo(id);
+  }
+});
+
+clearCompletedBtn.addEventListener('click', clearCompleted);
+
+filterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    activeFilter = button.dataset.filter;
+
+    filterButtons.forEach((btn) => {
+      btn.classList.toggle('active', btn === button);
+    });
+
+    renderTodos();
+  });
+});
+
+renderTodos();
