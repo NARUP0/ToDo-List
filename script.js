@@ -5,9 +5,28 @@ const todoList = document.getElementById('todo-list');
 const itemsLeft = document.getElementById('items-left');
 const clearCompletedBtn = document.getElementById('clear-completed');
 const filterButtons = document.querySelectorAll('.filter-btn');
+const navLinks = document.querySelectorAll('.nav-link');
 
 let todos = JSON.parse(localStorage.getItem(storageKey)) || [];
 let activeFilter = 'all';
+
+function createTodoId() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return window.crypto.randomUUID();
+  }
+
+  return `todo-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function setFilter(filterName) {
+  activeFilter = filterName;
+
+  filterButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.filter === filterName);
+  });
+
+  renderTodos();
+}
 
 function saveTodos() {
   localStorage.setItem(storageKey, JSON.stringify(todos));
@@ -78,7 +97,7 @@ function addTodo(text) {
   }
 
   todos.unshift({
-    id: crypto.randomUUID(),
+    id: createTodoId(),
     text: cleanedText,
     completed: false,
   });
@@ -162,13 +181,32 @@ clearCompletedBtn.addEventListener('click', clearCompleted);
 
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    activeFilter = button.dataset.filter;
+    setFilter(button.dataset.filter);
+  });
+});
 
-    filterButtons.forEach((btn) => {
-      btn.classList.toggle('active', btn === button);
-    });
+navLinks.forEach((link) => {
+  link.addEventListener('click', (event) => {
+    const target = link.dataset.target;
 
-    renderTodos();
+    if (target === 'tasks') {
+      event.preventDefault();
+      document.getElementById('tasks').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      todoInput.focus();
+      return;
+    }
+
+    if (target === 'completed') {
+      event.preventDefault();
+      setFilter('completed');
+      document.getElementById('tasks').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    if (target === 'home') {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   });
 });
 
